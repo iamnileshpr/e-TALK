@@ -28,10 +28,52 @@ export const signup = async function(req, res) {
             generateToken(user._id, res);
             await user.save();
 
-            res.status(201).json({ message: "user created successfully", success: true })
+            res.status(201).json({
+                _id: user.id,
+                name: user.name,
+                email: user.email,
+                profilePic: user.profilePic,
+                message: "user created successfully",
+                success: true
+            })
+        } else {
+            res.status(500).json({ mesage: "invalid user id" })
         }
     } catch (error) {
         console.log("error in signup", error);
         res.status(500).json({ message: "Internal server error" })
+    }
+}
+
+export const login = async function(req, res) {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email })
+        if (!user) {
+            res.status(400).json({ message: "User not found", success: false })
+        }
+        const isMatched = await bcrypt.compare(password, user.password)
+        generateToken(user._id, res) //passsword is correct
+        res.status(201).json({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            profilePic: user.profilePic,
+            message: "user login successfully",
+            success: true
+        })
+    } catch (error) {
+        console.log("Error in login", error);
+        res.status(500).json({ message: "Internal  server error" })
+    }
+}
+
+export const logout = async function(req, res) {
+    try {
+        res.cookoie('token', '', { maxAge: 0 })
+
+    } catch (error) {
+        console.log("Error in logout", error);
+        res.status(500).json({ message: "Error in internal server" })
     }
 }
