@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { generateToken } from '../lib/utils.js';
 
+import cloudinary from '../lib/cloudinary.js';
+
+
 export const signup = async function(req, res) {
     try {
         const { name, email, password } = req.body;
@@ -74,6 +77,36 @@ export const logout = async function(req, res) {
 
     } catch (error) {
         console.log("Error in logout", error);
+        res.status(500).json({ message: "Error in internal server" })
+    }
+}
+
+export const updateProfile = async function() {
+    try {
+        const { profilePic } = req.body;
+        const userId = req.user._id;
+
+        if (!profilePic) {
+            return res.status(400).json({ message: "Profile picture is required" })
+        }
+        const result = await cloudinary.uploader.upload(profilePic);
+        const updatedUser = await User.findByIdAndUpdate(userId, { profilePic: result.secure_url }, { new: true })
+        res.status(200).json({
+            updatedUser,
+            message: "profile picture updated successfully",
+            success: true
+        })
+    } catch (error) {
+        console.log("Error in update profile", error);
+        res.status(500).json({ message: "Error in internal server" })
+    }
+}
+
+export const isAuth = async function(req, res) {
+    try {
+        res.status(200).json(req.user)
+    } catch (error) {
+        console.log("Error in isAuth", error);
         res.status(500).json({ message: "Error in internal server" })
     }
 }
