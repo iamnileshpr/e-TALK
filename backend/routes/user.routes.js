@@ -1,11 +1,14 @@
 import express, { Router } from 'express'
-import { login, logout, signup } from '../controllers/user.controllers';
+import { isAuth, login, logout, signup, updateProfile } from '../controllers/user.controllers.js';
+import {
+    isAuthenticated
+} from '../middlewares/auth.middlerwares.js'
 const router = express.Router();
 
 
 router.post('/signup', signup)
 router.post('/login', login)
 router.post('/logut', logout)
-router.post('/update-profile', isAuthenticated)
-
-export default rout
+router.put('/update-profile', isAuthenticated, updateProfile)
+router.get('/check', isAuthenticated, isAuth)
+export default router;
