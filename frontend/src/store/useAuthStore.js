@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import Signup from '../pages/Signup'
 export const useAuthStore = create((set) => ({
     authUser: null,
-    isLoadingUp: false,
+    isSigningUp: false,
     isLoggingIn: false,
     isCheckingAuth: true,
 
@@ -20,14 +20,23 @@ export const useAuthStore = create((set) => ({
             set({ isCheckingAuth: false })
         }
     },
-    Signup: async() => {
+    Signup: async(data) => {
+        set({
+            isSigningUp: true
+        });
+
         try {
+            const res = await axios.post('/users/signup', data)
+            set({
+                authUser: res.data
+            })
+            toast.success(res.data.message)
 
         } catch (error) {
             console.log("error in signup", error);
-            set({ authUser: null });
+            toast.success(error.response.data.message)
         } finally {
-            set(isSi)
+            set({ isSigningUp: false })
         }
     }
 }))
