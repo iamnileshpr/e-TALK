@@ -2,9 +2,7 @@ import User from '../models/user.model.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { generateToken } from '../lib/utils.js';
-
 import cloudinary from '../lib/cloudinary.js';
-
 
 export const signup = async function(req, res) {
     try {
@@ -13,7 +11,7 @@ export const signup = async function(req, res) {
             return res.status(400).json({ message: "all field are required", success: false })
         }
         if (password.length < 5) {
-            return res.status().json({ message: "Password must contain 5 words", success: false })
+            return res.status(400).json({ message: "Password must contain 5 words", success: false })
         }
         const existuser = await User.findOne({ email });
         if (existuser) {
@@ -21,7 +19,7 @@ export const signup = async function(req, res) {
         }
         const hashPassword = await bcrypt.hash(password, 10)
 
-        const user = new User({ //user created
+        const user = new User({
             name,
             email,
             password: hashPassword
@@ -40,7 +38,7 @@ export const signup = async function(req, res) {
                 success: true
             })
         } else {
-            res.status(500).json({ mesage: "invalid user id" })
+            res.status(500).json({ message: "invalid user id" })
         }
     } catch (error) {
         console.log("error in signup", error);
@@ -53,10 +51,13 @@ export const login = async function(req, res) {
         const { email, password } = req.body;
         const user = await User.findOne({ email })
         if (!user) {
-            res.status(400).json({ message: "User not found", success: false })
+            return res.status(400).json({ message: "User not found", success: false })
         }
         const isMatched = await bcrypt.compare(password, user.password)
-        generateToken(user._id, res) //passsword is correct
+        if (!isMatched) {
+            return res.status(400).json({ message: "Invalid password", success: false })
+        }
+        generateToken(user._id, res)
         res.status(201).json({
             _id: user.id,
             name: user.name,
@@ -67,21 +68,21 @@ export const login = async function(req, res) {
         })
     } catch (error) {
         console.log("Error in login", error);
-        res.status(500).json({ message: "Internal  server error" })
+        res.status(500).json({ message: "Internal server error" })
     }
 }
 
 export const logout = async function(req, res) {
     try {
-        res.cookoie('token', '', { maxAge: 0 })
-
+        res.cookie('token', '', { maxAge: 0 })
+        res.status(200).json({ message: "Logged out successfully", success: true })
     } catch (error) {
         console.log("Error in logout", error);
         res.status(500).json({ message: "Error in internal server" })
     }
 }
 
-export const updateProfile = async function() {
+export const updateProfile = async function(req, res) {
     try {
         const { profilePic } = req.body;
         const userId = req.user._id;
