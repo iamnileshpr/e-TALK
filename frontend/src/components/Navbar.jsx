@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore.js";
+// Missing imports at the top:
+
+
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
   return (

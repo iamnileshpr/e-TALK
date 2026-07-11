@@ -28,7 +28,7 @@ const Profile = () => {
   };
   return (
     <div className="flex items-center justify-center mt-12">
-      <div className="bg-white shadow-lg p-8 rounded-xl w-[400px]">
+      <div className="bg-white shadow-lg p-8 rounded-xl w-100">
         {/* Profile Image Upload */}
         <div className="relative w-32 h-32 mx-auto">
           <img
