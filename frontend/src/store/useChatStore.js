@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
-import { getMessages, getUsers } from "../../../backend/controllers/message.controllers";
+//import { getMessages, getUsers } from "../../../backend/controllers/message.controllers";
 
 export const useChatStore = create((set) => {
     return {
