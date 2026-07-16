@@ -6,6 +6,7 @@ import { config } from 'dotenv';
 import { connectDB } from './config/db.js';
 import userRoutes from './routes/user.routes.js'
 import messageRoutes from './routes/message.routes.js'
+import { app, server } from "./lib/socket.js";
 
 
 dotenv.config();
@@ -30,6 +31,6 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes)
 app.use('/api/messages', messageRoutes)
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`server is running on PORT ${PORT}`);
 })

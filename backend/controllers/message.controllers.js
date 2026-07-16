@@ -16,7 +16,7 @@ export const getUsers = async function(req, res) {
 export const getMessages = async function(req, res) {
     try {
         const senderId = req.user._id;
-        const { receiverId } = req.params;
+        const { id: receiverId } = req.params;
         const messages = await Message.find({
             $or: [{
                     senderId: senderId,
@@ -28,7 +28,7 @@ export const getMessages = async function(req, res) {
                 }
             ],
         })
-        res.status(200).json({ messages, success: true })
+        res.status(200).json(messages)
     } catch (error) {
         console.error("Error in get message :", error.Message);
         res.status(500).json({ error: "Internal server error " });
