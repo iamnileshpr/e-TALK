@@ -5,7 +5,8 @@ import SidebarSkeleton from "./SidebarSkeleton";
 import { useEffect } from "react";
 
 const Sidebar = () => {
-  const { selectedUser, setSelectedUser, users, getUsers, isUsersLoading } =useChatStore();
+  const { selectedUser, setSelectedUser, users, getUsers, isUsersLoading } =
+    useChatStore();
 
   const { onlineUsers } = useAuthStore();
 

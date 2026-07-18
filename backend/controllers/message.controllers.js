@@ -1,62 +1,66 @@
 import Message from "../models/message.model.js";
 import User from "../models/user.model.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 import cloudinary from "../lib/cloudinary.js";
-
-export const getUsers = async function(req, res) {
+export const getUsers = async(req, res) => {
     try {
-        const logedInUserId = req.user._id;
-        const filterdUsers = await User.find({ _id: { $ne: logedInUserId } }).select("-password");
-        res.status(200.).json(filterdUsers);
+        const loggedInUserId = req.user._id;
+        const filteredUsers = await User.find({
+            _id: { $ne: loggedInUserId },
+        }).select("-password");
+        res.status(200).json(filteredUsers);
     } catch (error) {
-        console.error("Error in get user for side bar:", error.Message);
-        res.status(500).json({ error: "Internal server error " });
+        console.error("Error in getUsers: ", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
-}
+};
 
-export const getMessages = async function(req, res) {
+export const getMessages = async(req, res) => {
     try {
         const senderId = req.user._id;
         const { id: receiverId } = req.params;
-        const messages = await Message.find({
-            $or: [{
-                    senderId: senderId,
-                    receiverId: receiverId
-                },
-                {
-                    senderId: receiverId,
-                    receiverId: senderId
-                }
-            ],
-        })
-        res.status(200).json(messages)
-    } catch (error) {
-        console.error("Error in get message :", error.Message);
-        res.status(500).json({ error: "Internal server error " });
-    }
-}
 
-export const sendMessage = async function(req, res) {
+        const messages = await Message.find({
+            $or: [
+                { senderId: senderId, receiverId: receiverId },
+                { senderId: receiverId, receiverId: senderId },
+            ],
+        });
+
+        res.status(200).json(messages);
+    } catch (error) {
+        console.error("Error in get messages: ", error.message);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+export const sendMessage = async(req, res) => {
     try {
         const { text, image } = req.body;
         const { receiverId } = req.params;
-        const sendMessage = user._id;
+        const senderId = req.user._id;
+
         let imageUrl;
         if (image) {
             const result = await cloudinary.uploader.upload(image);
             imageUrl = result.secure_url;
         }
-
         const message = new Message({
             senderId,
             receiverId,
             text,
-            image: imageUrl
-        })
+            image: imageUrl,
+        });
         await message.save();
-        res.status(200).json({ success: true, message: "Message sent successfully" })
 
+        const receiverSocketId = getReceiverSocketId(receiverId);
+
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("message", message);
+        }
+        res.status(201).json(message);
     } catch (error) {
-        console.error("Error in send message :", error.Message);
-        res.status(500).json({ error: "Internal server error " });
+        console.error("Error in sendMessage: ", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
-}
+};
